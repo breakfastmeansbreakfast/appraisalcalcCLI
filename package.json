@@ -1,0 +1,15 @@
+{
+  "name": "tom",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Appraisal.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {}
+}
