@@ -1,4 +1,3 @@
-
 /* eslint-disable max-len */
 let calcInputs = require('./Inputs');
 const _ = require('lodash');
@@ -72,11 +71,28 @@ const capRevenue = () => {
 // add currency styling
 const capRev = capRevenue().toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
 const intRev = interimRevenue()[0].toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
-const totalRev = (interimRevenue()[0] + capRevenue()).toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
+const totalRevCurr = (interimRevenue()[0] + capRevenue()).toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
+const totalRev = (interimRevenue()[0] + capRevenue())
 
 // dev appraisal start
+const totalCosts = []
+totalCosts.push(calcInputs.scheme.landPrice);
+totalCosts.push(calcInputs.scheme.sdlt);
+totalCosts.push(calcInputs.scheme.legalLand);
+totalCosts.push(calcInputs.scheme.constructionCost);
 
+Object.keys(calcInputs.scheme.fees).forEach(key => {
+    totalCosts.push(calcInputs.scheme.fees[key] * calcInputs.scheme.constructionCost)
+});
+
+const sumTotalCosts = _.sum(totalCosts);
+const profit = totalRev - sumTotalCosts;
+const profitOC = profit / sumTotalCosts;
+const sumTotalCostsCurr = sumTotalCosts.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
 
 console.log("Sale value: " + capRev);
 console.log("Interim rental revenue: " + intRev);
-console.log("Total receipts: " + totalRev);
+console.log("Total receipts: " + totalRevCurr);
+console.log("Total costs: " + sumTotalCostsCurr);
+console.log("Profit: " + profit)
+console.log("Profit on cost: " + profitOC)
