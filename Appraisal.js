@@ -1,7 +1,9 @@
+/* eslint-disable no-console */
 /* eslint-disable max-len */
-let calcInputs = require('./Inputs');
+const calcInputs = require('./Inputs');
 const _ = require('lodash');
-calcInputs = calcInputs.calcInputs
+
+// calcInputs = calcInputs.calcInputs;
 
 const rentArray = (unitInput) => {
   const rentarray = [];
@@ -42,12 +44,17 @@ const interimRevenue = () => {
   const interim2bed = rentTotal(twoBedArray, calcInputs.units.bedno2);
   const interim3bed = rentTotal(threeBedArray, calcInputs.units.bedno3);
 
-  const total = interim1bed.rentTotalAmount + interim2bed.rentTotalAmount + interim3bed.rentTotalAmount;
-  const rentData = [total, interim1bed, interim2bed, interim3bed];
+  const gross = interim1bed.rentTotalAmount + interim2bed.rentTotalAmount + interim3bed.rentTotalAmount;
+  const managementCostInterim = gross * calcInputs.managementCost;
+  const net = gross - managementCostInterim;
+  const rentData = [gross, net, managementCostInterim, interim1bed, interim2bed, interim3bed];
   return rentData;
 };
 
 // calculate stabalised sale value
+
+let grossStabalisedRevenue;
+
 const capRevenue = () => {
   const grown1bed = oneBedArray[calcInputs.growthPeriod + calcInputs.stabalisationPeriod - 1];
   const grown2bed = twoBedArray[calcInputs.growthPeriod + calcInputs.stabalisationPeriod - 1];
@@ -58,13 +65,10 @@ const capRevenue = () => {
   grown2bed * calcInputs.units.bedno2 +
   grown3bed * calcInputs.units.bedno3;
 
-  const grossStabalisedRevenue = ((rentRevenue / calcInputs.yield) * 12);
+  grossStabalisedRevenue = ((rentRevenue / calcInputs.yield) * 12);
 
-  const purchasersCosts = calcInputs.purchasersCosts;
-  const managementCost = calcInputs.managementCost;
-
-  let netTotalRevenue = grossStabalisedRevenue * (1 - purchasersCosts);
-  netTotalRevenue = netTotalRevenue * (1 - managementCost);
+  let netTotalRevenue = grossStabalisedRevenue * (1 - calcInputs.purchasersCosts);
+  netTotalRevenue = netTotalRevenue * (1 - calcInputs.managementCost);
   return netTotalRevenue;
 };
 
@@ -72,27 +76,55 @@ const capRevenue = () => {
 const capRev = capRevenue().toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
 const intRev = interimRevenue()[0].toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
 const totalRevCurr = (interimRevenue()[0] + capRevenue()).toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
-const totalRev = (interimRevenue()[0] + capRevenue())
+const totalRev = (interimRevenue()[0] + capRevenue());
+const mancoCharge = interimRevenue()[2].toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
 
 // dev appraisal start
-const totalCosts = []
+const totalCosts = [];
+totalCosts.push(interimRevenue()[2]);
 totalCosts.push(calcInputs.scheme.landPrice);
 totalCosts.push(calcInputs.scheme.sdlt);
 totalCosts.push(calcInputs.scheme.legalLand);
 totalCosts.push(calcInputs.scheme.constructionCost);
 
 Object.keys(calcInputs.scheme.fees).forEach(key => {
-    totalCosts.push(calcInputs.scheme.fees[key] * calcInputs.scheme.constructionCost)
+  totalCosts.push(calcInputs.scheme.fees[key] * calcInputs.scheme.constructionCost);
 });
 
+// add Manco interim costs
+totalCosts.push(interimRevenue()[2]);
+
+const financeCost = 9000000;
+totalCosts.push(financeCost);
+
 const sumTotalCosts = _.sum(totalCosts);
-const profit = totalRev - sumTotalCosts;
-const profitOC = profit / sumTotalCosts;
+const profit = (totalRev - sumTotalCosts);
+const profitCurr = profit.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
+let profitOC = (profit / sumTotalCosts);
+profitOC = (profitOC * 100).toFixed(2) + '%';
 const sumTotalCostsCurr = sumTotalCosts.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
 
-console.log("Sale value: " + capRev);
-console.log("Interim rental revenue: " + intRev);
-console.log("Total receipts: " + totalRevCurr);
-console.log("Total costs: " + sumTotalCostsCurr);
-console.log("Profit: " + profit)
-console.log("Profit on cost: " + profitOC)
+const getFees = () => {
+  let temparray = [];
+  Object.keys(calcInputs.scheme.fees).forEach(key => {
+    temparray.push(calcInputs.scheme.fees[key] * calcInputs.scheme.constructionCost);
+  });
+  temparray = _.sum(temparray);
+  temparray = temparray.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
+  return temparray;
+};
+
+const getFinance = () => {
+let total = 90000000;
+return total;
+}
+
+
+console.log(`Sale value: ${ capRev}`);
+console.log(`Interim gross rental revenue: ${ intRev}`);
+console.log(`Interim ManCo charge: ${ mancoCharge}`);
+console.log(`Total receipts: ${ totalRevCurr}`);
+console.log(`Consultant fees: ${ getFees()}`);
+console.log(`Total costs: ${ sumTotalCostsCurr}`);
+console.log(`Profit: ${ profitCurr}`);
+console.log(`Profit on cost: ${ profitOC}`);
