@@ -1,9 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable max-len */
-const calcInputs = require('./Inputs');
+const calcInputs = require('../Inputs-DeansgateStn');
 const _ = require('lodash');
-
-// calcInputs = calcInputs.calcInputs;
 
 const rentArray = (unitInput) => {
   const rentarray = [];
@@ -32,7 +30,7 @@ const rentTotal = (unitType, unitTypeNo) => {
   return rentData;
 };
 
-// create array of full rents from month 0 onwards
+// create array of full rents from month 0 to growthPeriod + stabalisationPeriod
 const oneBedArray = rentArray(calcInputs.rents.rent1bed);
 const twoBedArray = rentArray(calcInputs.rents.rent2bed);
 const threeBedArray = rentArray(calcInputs.rents.rent3bed);
@@ -104,6 +102,8 @@ let profitOC = (profit / sumTotalCosts);
 profitOC = (profitOC * 100).toFixed(2) + '%';
 const sumTotalCostsCurr = sumTotalCosts.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
 
+// Fees are stored only in percentage value, similar to the original appraisal,
+// the user input (e.g. £10k) could be converted back to a % for storing.
 const getFees = () => {
   let temparray = [];
   Object.keys(calcInputs.scheme.fees).forEach(key => {

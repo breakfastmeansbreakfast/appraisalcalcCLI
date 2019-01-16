@@ -1,4 +1,5 @@
 const calcInputs = {
+  type: 'PRS',
   rents: {
     rent1bed: 950,
     rent2bed: 1250,
